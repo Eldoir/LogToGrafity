@@ -11,6 +11,8 @@
             <local:MainViewModel />
         </Window.DataContext>
     <Grid>
-        <TextBlock Text="{Binding Text}" />
+        <StackPanel>
+            <Button Command="{Binding OpenFileCommand}" Content="Select a file..." />
+        </StackPanel>
     </Grid>
 </Window>
