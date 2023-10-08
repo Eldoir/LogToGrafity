@@ -1,6 +1,10 @@
 ﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Windows;
 using System.Windows.Input;
 
@@ -26,7 +30,7 @@ namespace LogToGrafity
             if (openFileDialog.ShowDialog() != true)
                 return;
 
-            Result<string> result = ParseFile(openFileDialog.FileName);
+            Result<(string Eps1Content, string Eps2Content)> result = ParseFile(openFileDialog.FileName);
             if (result.IsFailure)
             {
                 ShowError(result.Message);
@@ -63,8 +67,8 @@ namespace LogToGrafity
                 else break;
             }
 
-            File.WriteAllText(Path.Join(directoryPath, eps1FileName), result.Value);
-            File.WriteAllText(Path.Join(directoryPath, eps2FileName), result.Value); // TODO: get result
+            File.WriteAllText(Path.Join(directoryPath, eps1FileName), result.Value.Eps1Content);
+            File.WriteAllText(Path.Join(directoryPath, eps2FileName), result.Value.Eps2Content);
             ShowSuccess("Saved!");
         }
 
@@ -83,11 +87,11 @@ namespace LogToGrafity
             MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
-        private Result<string> ParseFile(string filePath)
+        private Result<(string Eps1Content, string Eps2Content)> ParseFile(string filePath)
         {
             string[] lines = File.ReadAllLines(filePath);
             if (lines.Length < 4)
-                return Result.Fail<string>(
+                return Result.Fail<(string, string)>(
                     "File must be at least 4 lines (2 header lines, 1 line for column names, and at least 1 line of data)");
 
             List<Row> rows = new();
@@ -99,14 +103,30 @@ namespace LogToGrafity
 
                 Result<Row> rowResult = _rowParser.Parse(lines[i]);
                 if (rowResult.IsFailure)
-                    return Result.Fail<string>(rowResult.Message);
+                    return Result.Fail<(string, string)>(rowResult.Message);
 
                 rows.Add(rowResult.Value);
             }
 
-            FileResult result = _rowAnalyzer.Analyze(rows);
+            (EpsContainer Eps1, EpsContainer Eps2) = _rowAnalyzer.Analyze(rows);
 
-            return Result.Ok("couc");
+            return Result.Ok((ToString(Eps1), ToString(Eps2)));
+        }
+
+        private static string ToString(EpsContainer eps)
+        {
+            StringBuilder builder = new();
+
+            // Write column names
+            builder.AppendLine(string.Join(" ", new[] { "Freq" }.Concat(eps.ColumnNames)));
+
+            // Write rows
+            foreach (string freq in eps.Frequencies)
+            {
+                builder.AppendLine(string.Join(" ", new[] { freq }.Concat(eps.GetValues(freq))));
+            }
+
+            return builder.ToString();
         }
 
         private readonly IRowParser _rowParser;
