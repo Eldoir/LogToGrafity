@@ -22,19 +22,14 @@ namespace LogToGrafity
         }
 
         public ICommand OpenFileCommand { get; }
+
         public Color DragNDropColor
         {
             get => _dragNDropColor;
-            private set
-            {
-                if (_dragNDropColor != value)
-                {
-                    _dragNDropColor = value;
-                    RaisePropertyChanged(nameof(DragNDropColor));
-                }
-            }
+            private set => SetValue(ref _dragNDropColor, value);
         }
         private Color _dragNDropColor = OriginalColor;
+
         private static readonly Color OriginalColor = Color.Transparent;
 
         #region Drag'n'drop handlers
