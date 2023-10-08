@@ -1,7 +1,6 @@
 ﻿using Microsoft.Win32;
-using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -10,7 +9,10 @@ using System.Windows.Input;
 
 namespace LogToGrafity
 {
-    class MainViewModel
+    public class MainViewModel : DataModelBase,
+        IFileDragEnterHandler,
+        IFileDragLeaveHandler,
+        IFileDropHandler
     {
         public MainViewModel()
         {
@@ -20,17 +22,75 @@ namespace LogToGrafity
         }
 
         public ICommand OpenFileCommand { get; }
+        public Color DragNDropColor
+        {
+            get => _dragNDropColor;
+            private set
+            {
+                if (_dragNDropColor != value)
+                {
+                    _dragNDropColor = value;
+                    RaisePropertyChanged(nameof(DragNDropColor));
+                }
+            }
+        }
+        private Color _dragNDropColor = OriginalColor;
+        private static readonly Color OriginalColor = Color.Transparent;
+
+        #region Drag'n'drop handlers
+
+        public bool OnDragEnter(string[] filepaths)
+        {
+            bool accepts = filepaths.All(IsCorrectFormat);
+            DragNDropColor = accepts ? Color.LawnGreen : Color.IndianRed;
+            return accepts;
+        }
+
+        public void OnDragLeave(string[] filepaths)
+        {
+            DragNDropColor = OriginalColor;
+        }
+
+        public void OnDrop(string[] filepaths)
+        {
+            if (filepaths.All(IsCorrectFormat))
+            {
+                if (filepaths.Length > 1)
+                {
+                    ShowWarning("Multiple files are not allowed at the moment. Only the first file will be processed.");
+                }
+                ReadFile(filepaths[0]);
+            }
+            else
+            {
+                ShowError("File must be a .log file.");
+            }
+
+            OnDragLeave(filepaths);
+        }
+
+        #endregion
+
+        private static bool IsCorrectFormat(string filePath)
+        {
+            return filePath.EndsWith(".log");
+        }
 
         private void OpenFile()
         {
             OpenFileDialog openFileDialog = new()
             {
-                Filter = "Log files (*.log)|*.log|All files (*.*)|*.*"
+                Filter = "Log files (*.log)|*.log"
             };
             if (openFileDialog.ShowDialog() != true)
                 return;
 
-            Result<(string Eps1Content, string Eps2Content)> result = ParseFile(openFileDialog.FileName);
+            ReadFile(openFileDialog.FileName);
+        }
+
+        private void ReadFile(string filePath)
+        {
+            Result<(string Eps1Content, string Eps2Content)> result = ParseFile(filePath);
             if (result.IsFailure)
             {
                 ShowError(result.Message);
@@ -78,13 +138,17 @@ namespace LogToGrafity
         }
 
         private static void ShowSuccess(string message)
-        {
-            MessageBox.Show(message, "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
+            => ShowMessage(message, "Success", MessageBoxImage.Information);
+
+        private static void ShowWarning(string message)
+            => ShowMessage(message, "Warning", MessageBoxImage.Warning);
 
         private static void ShowError(string message)
+            => ShowMessage(message, "Error", MessageBoxImage.Error);
+
+        private static void ShowMessage(string message, string caption, MessageBoxImage image)
         {
-            MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(message, caption, MessageBoxButton.OK, image);
         }
 
         private Result<(string Eps1Content, string Eps2Content)> ParseFile(string filePath)

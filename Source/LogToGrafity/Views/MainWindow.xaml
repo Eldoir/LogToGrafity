@@ -5,14 +5,36 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LogToGrafity"
         mc:Ignorable="d"
-        Title="LogToGrafity" Height="300" Width="300"
+        Title="LogToGrafity" Height="200" Width="400"
         WindowStartupLocation="CenterScreen">
         <Window.DataContext>
             <local:MainViewModel />
         </Window.DataContext>
-    <Grid>
-        <StackPanel>
-            <Button Command="{Binding OpenFileCommand}" Content="Select a file..." />
-        </StackPanel>
+        <Window.Resources>
+            <local:ColorToBrushConverter x:Key="ColorToBrushConverter" />
+        </Window.Resources>
+    <Grid Margin="5">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50" />
+            <RowDefinition Height="5" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Button Grid.Row="0"
+                Command="{Binding OpenFileCommand}"
+                Content="Select a file..."
+                Padding="5" />
+        <Grid Grid.Row="2">
+            <Rectangle
+                Fill="{Binding DragNDropColor, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
+                AllowDrop="True"
+                local:FileDragDropHelper.IsFileDragDropEnabled="True"
+                local:FileDragDropHelper.FileDragDropTarget="{Binding}"
+                Stroke="Black"
+                StrokeDashArray="20 10" />
+            <TextBlock Text="Or drag a file here"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       IsHitTestVisible="False" />
+        </Grid>
     </Grid>
 </Window>
