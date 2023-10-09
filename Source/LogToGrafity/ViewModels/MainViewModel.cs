@@ -1,5 +1,7 @@
 ﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -16,11 +18,14 @@ namespace LogToGrafity
         public MainViewModel()
         {
             OpenFileCommand = new DelegateCommand(OpenFile);
+            ConvertCommand = new DelegateCommand(ConvertFiles);
+
             _rowParser = new RowParser();
             _rowAnalyzer = new RowAnalyzer();
         }
 
         public ICommand OpenFileCommand { get; }
+        public ICommand ConvertCommand { get; }
 
         public DragNDropState DragNDropState
         {
@@ -28,6 +33,9 @@ namespace LogToGrafity
             private set => SetValue(ref _dragNDropState, value);
         }
         private DragNDropState _dragNDropState;
+
+        public ObservableCollection<LogFileViewModel> LogFiles => _logFiles;
+        private readonly ObservableCollection<LogFileViewModel> _logFiles = new() { /*new("lol"), new(), new(), new(), new()*/ };
 
         #region Drag'n'drop handlers
 
@@ -45,17 +53,16 @@ namespace LogToGrafity
 
         public void OnDrop(string[] filepaths)
         {
-            if (filepaths.All(IsCorrectFormat))
+            foreach (string filepath in filepaths)
             {
-                if (filepaths.Length > 1)
+                if (IsCorrectFormat(filepath))
                 {
-                    ShowWarning("Multiple files are not allowed at the moment. Only the first file will be processed.");
+                    AddFile(filepath);
                 }
-                ReadFile(filepaths[0]);
-            }
-            else
-            {
-                ShowError("File must be a .log file.");
+                else
+                {
+                    ShowError($"File {filepath} is not a log file. It will be ignored.");
+                }
             }
 
             OnDragLeave(filepaths);
@@ -77,11 +84,46 @@ namespace LogToGrafity
             if (openFileDialog.ShowDialog() != true)
                 return;
 
-            ReadFile(openFileDialog.FileName);
+            AddFile(openFileDialog.FileName);
+        }
+
+        private void ConvertFiles()
+        {
+            foreach (LogFileViewModel logFile in LogFiles)
+            {
+                ReadFile(logFile.FilePath);
+            }
+        }
+
+        private void AddFile(string filePath)
+        {
+            if (!LogFiles.Any(f => f.FilePath == filePath))
+            {
+                LogFileViewModel logFile = new(filePath);
+                logFile.OnRemoved += OnRemoveFile;
+                LogFiles.Add(logFile);
+                RaisePropertyChanged(nameof(LogFiles));
+            }
+        }
+
+        private void OnRemoveFile(object? sender, EventArgs args)
+        {
+            if (sender is not LogFileViewModel logFile)
+                return;
+
+            logFile.OnRemoved -= OnRemoveFile;
+            LogFiles.Remove(logFile);
+            RaisePropertyChanged(nameof(LogFiles));
         }
 
         private void ReadFile(string filePath)
         {
+            if (!File.Exists(filePath))
+            {
+                ShowError($"File {filePath} no longer exists. It will be ignored.");
+                return;
+            }
+
             Result<(string Eps1Content, string Eps2Content)> result = ParseFile(filePath);
             if (result.IsFailure)
             {
@@ -93,7 +135,7 @@ namespace LogToGrafity
 
             System.Windows.Forms.FolderBrowserDialog dialog = new()
             {
-                RootFolder = System.Environment.SpecialFolder.Desktop,
+                RootFolder = Environment.SpecialFolder.Desktop,
                 ShowNewFolderButton = true
             };
             if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
