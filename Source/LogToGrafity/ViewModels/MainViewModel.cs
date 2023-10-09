@@ -61,7 +61,7 @@ namespace LogToGrafity
                 }
                 else
                 {
-                    ShowError($"File {filepath} is not a log file. It will be ignored.");
+                    ShowWarning($"File {filepath} is not a log file. It will be ignored.");
                 }
             }
 
@@ -120,7 +120,7 @@ namespace LogToGrafity
         {
             if (!File.Exists(filePath))
             {
-                ShowError($"File {filePath} no longer exists. It will be ignored.");
+                ShowWarning($"File {filePath} no longer exists. It will be ignored.");
                 return;
             }
 
