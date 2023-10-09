@@ -1,6 +1,5 @@
 ﻿using Microsoft.Win32;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -23,27 +22,25 @@ namespace LogToGrafity
 
         public ICommand OpenFileCommand { get; }
 
-        public Color DragNDropColor
+        public DragNDropState DragNDropState
         {
-            get => _dragNDropColor;
-            private set => SetValue(ref _dragNDropColor, value);
+            get => _dragNDropState;
+            private set => SetValue(ref _dragNDropState, value);
         }
-        private Color _dragNDropColor = OriginalColor;
-
-        private static readonly Color OriginalColor = Color.Transparent;
+        private DragNDropState _dragNDropState;
 
         #region Drag'n'drop handlers
 
         public bool OnDragEnter(string[] filepaths)
         {
             bool accepts = filepaths.All(IsCorrectFormat);
-            DragNDropColor = accepts ? Color.LawnGreen : Color.IndianRed;
+            DragNDropState = accepts ? DragNDropState.Accept : DragNDropState.Reject;
             return accepts;
         }
 
         public void OnDragLeave(string[] filepaths)
         {
-            DragNDropColor = OriginalColor;
+            DragNDropState = DragNDropState.Idle;
         }
 
         public void OnDrop(string[] filepaths)

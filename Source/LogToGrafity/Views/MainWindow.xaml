@@ -11,8 +11,11 @@
             <local:MainViewModel />
         </Window.DataContext>
         <Window.Resources>
-            <local:ColorToBrushConverter x:Key="ColorToBrushConverter" />
-        </Window.Resources>
+        <local:MultiConverter x:Key="DragNDropStateToBrushConverter">
+            <local:DragNDropStateToColorConverter />
+            <local:ColorToBrushConverter />
+        </local:MultiConverter>
+    </Window.Resources>
     <Grid Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="50" />
@@ -25,7 +28,7 @@
                 Padding="5" />
         <Grid Grid.Row="2">
             <Rectangle
-                Fill="{Binding DragNDropColor, Converter={StaticResource ColorToBrushConverter}, Mode=OneWay}"
+                Fill="{Binding DragNDropState, Converter={StaticResource DragNDropStateToBrushConverter}, Mode=OneWay}"
                 AllowDrop="True"
                 local:FileDragDropHelper.IsFileDragDropEnabled="True"
                 local:FileDragDropHelper.FileDragDropTarget="{Binding}"
