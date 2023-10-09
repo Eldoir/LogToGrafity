@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:b="http://schemas.microsoft.com/xaml/behaviors"
         xmlns:local="clr-namespace:LogToGrafity"
         mc:Ignorable="d"
         Title="LogToGrafity" Height="200" Width="400"
@@ -10,34 +11,45 @@
         <Window.DataContext>
             <local:MainViewModel />
         </Window.DataContext>
-        <Window.Resources>
+    <Window.Resources>
         <local:MultiConverter x:Key="DragNDropStateToBrushConverter">
             <local:DragNDropStateToColorConverter />
             <local:ColorToBrushConverter />
         </local:MultiConverter>
     </Window.Resources>
     <Grid Margin="5">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="50" />
-            <RowDefinition Height="5" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <Button Grid.Row="0"
-                Command="{Binding OpenFileCommand}"
-                Content="Select a file..."
-                Padding="5" />
-        <Grid Grid.Row="2">
-            <Rectangle
-                Fill="{Binding DragNDropState, Converter={StaticResource DragNDropStateToBrushConverter}, Mode=OneWay}"
-                AllowDrop="True"
-                local:FileDragDropHelper.IsFileDragDropEnabled="True"
-                local:FileDragDropHelper.FileDragDropTarget="{Binding}"
-                Stroke="Black"
-                StrokeDashArray="20 10" />
-            <TextBlock Text="Or drag a file here"
-                       VerticalAlignment="Center"
-                       HorizontalAlignment="Center"
-                       IsHitTestVisible="False" />
-        </Grid>
+        <Rectangle
+            AllowDrop="True"
+            local:FileDragDropHelper.IsFileDragDropEnabled="True"
+            local:FileDragDropHelper.FileDragDropTarget="{Binding}"
+            Stroke="Black"
+            StrokeDashArray="20 10"
+            Cursor="Hand">
+            <b:Interaction.Triggers>
+                <b:EventTrigger EventName="MouseLeftButtonDown">
+                    <b:InvokeCommandAction Command="{Binding OpenFileCommand}" />
+                </b:EventTrigger>
+            </b:Interaction.Triggers>
+            <Rectangle.Style>
+                <Style TargetType="{x:Type Rectangle}">
+                    <Setter Property="Fill"
+                            Value="{Binding DragNDropState, Converter={StaticResource DragNDropStateToBrushConverter}, Mode=OneWay}" />
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Fill" Value="AliceBlue" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Rectangle.Style>
+        </Rectangle>
+        <TextBlock
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center"
+            IsHitTestVisible="False">
+            <Run Text="Click" FontWeight="Bold" />
+            <Run Text=" or " />
+            <Run Text="Drag" FontWeight="Bold" />
+            <Run Text=" a file here" />
+        </TextBlock>
     </Grid>
 </Window>
