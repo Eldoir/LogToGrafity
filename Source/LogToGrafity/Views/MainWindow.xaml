@@ -20,8 +20,9 @@
                     <local:DragNDropStateToColorConverter />
                     <local:ColorToBrushConverter />
                 </local:MultiConverter>
-                <local:CollectionSizeConverter x:Key="EmptyToVisibleConverter" IfEmpty="Visible" IfNotEmpty="Collapsed" />
-                <local:CollectionSizeConverter x:Key="EmptyToCollapsedConverter" IfEmpty="Collapsed" IfNotEmpty="Visible" />
+                <local:CollectionSizeConverter x:Key="EmptyToVisible" IfEmpty="Visible" IfNotEmpty="Collapsed" />
+                <local:CollectionSizeConverter x:Key="EmptyToCollapsed" IfEmpty="Collapsed" IfNotEmpty="Visible" />
+                <local:CollectionSizeConverter x:Key="EmptyToFalse" IfEmpty="False" IfNotEmpty="True" />
             </ResourceDictionary>
         </Window.Resources>
     <Grid Margin="5">
@@ -85,16 +86,17 @@
                     <Grid>
                         <Rectangle Fill="AliceBlue" Stroke="Black" />
                         <TextBlock Text="No file." Foreground="DimGray" Margin="5"
-                                   Visibility="{Binding LogFiles, Converter={StaticResource EmptyToVisibleConverter}}" />
+                                   Visibility="{Binding LogFiles, Converter={StaticResource EmptyToVisible}}" />
                         <ItemsControl
                             DataContext="{Binding}"
-                            Visibility="{Binding LogFiles, Converter={StaticResource EmptyToCollapsedConverter}}"
+                            Visibility="{Binding LogFiles, Converter={StaticResource EmptyToCollapsed}}"
                             ItemsSource="{Binding LogFiles}"
                             ItemTemplate="{StaticResource LogFileTemplate}" />
                     </Grid>
                 </ScrollViewer>
                 <Button Grid.Row="2"
                         Command="{Binding ConvertCommand}"
+                        IsEnabled="{Binding LogFiles, Converter={StaticResource EmptyToFalse}}"
                         Content="Convert ↦"
                         FontSize="18"
                         Padding="5" />
