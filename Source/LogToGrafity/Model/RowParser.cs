@@ -1,4 +1,6 @@
-﻿namespace LogToGrafity
+﻿using System.Globalization;
+
+namespace LogToGrafity
 {
     public record Row(string Freq, double Temp, string Eps1, string Eps2);
 
@@ -16,7 +18,7 @@
                 return Result.Fail<Row>("Row needs at least 8 values since, eps1 and eps2 are the 7th and 8th values");
 
             string tempStr = values[1];
-            if (!double.TryParse(tempStr, out double temp))
+            if (!double.TryParse(tempStr, CultureInfo.InvariantCulture, out double temp))
                 return Result.Fail<Row>($"Unknown temperature: {tempStr}");
 
             string freq = values[0];
