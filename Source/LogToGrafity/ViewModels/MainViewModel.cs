@@ -35,7 +35,7 @@ namespace LogToGrafity
         private DragNDropState _dragNDropState;
 
         public ObservableCollection<LogFileViewModel> LogFiles => _logFiles;
-        private readonly ObservableCollection<LogFileViewModel> _logFiles = new() { /*new("lol"), new(), new(), new(), new()*/ };
+        private readonly ObservableCollection<LogFileViewModel> _logFiles = new();
 
         #region Drag'n'drop handlers
 
@@ -93,10 +93,73 @@ namespace LogToGrafity
 
         private void ConvertFiles()
         {
+            string directoryPath = string.Empty;
+
             foreach (LogFileViewModel logFile in LogFiles)
             {
-                ReadFile(logFile.FilePath);
+                if (!File.Exists(logFile.FilePath))
+                {
+                    ShowWarning($"File {logFile.FilePath} no longer exists. It will be ignored.");
+                    continue;
+                }
+
+                Result<(string Eps1Content, string Eps2Content)> result = ParseFile(logFile.FilePath);
+                if (result.IsFailure)
+                {
+                    ShowError(result.Message);
+                    continue;
+                }
+
+                string fileName = Path.GetFileNameWithoutExtension(logFile.FilePath);
+                string eps1FileName = $"{fileName}_eps1.csv";
+                string eps2FileName = $"{fileName}_eps2.csv";
+
+                if (string.IsNullOrEmpty(directoryPath))
+                {
+                    ShowSuccess("Select a folder where converted files will be saved.");
+
+                    System.Windows.Forms.FolderBrowserDialog dialog = new()
+                    {
+                        RootFolder = Environment.SpecialFolder.Desktop,
+                        ShowNewFolderButton = true
+                    };
+                    if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+                        return;
+
+                    directoryPath = dialog.SelectedPath;
+                    
+                    while (DirectoryContains(directoryPath, eps1FileName) || DirectoryContains(directoryPath, eps2FileName))
+                    {
+                        // TODO: fix this messagebox appearing only if the files from the FIRST source already exist
+                        if (MessageBox.Show(
+                            $"Files already exist at that location. Do you want to overwrite them?",
+                            "Overwrite?",
+                            MessageBoxButton.YesNo,
+                            MessageBoxImage.Question) == MessageBoxResult.No)
+                        {
+                            if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+                                return;
+
+                            directoryPath = dialog.SelectedPath;
+                        }
+                        else break;
+                    }
+                }
+
+                File.WriteAllText(Path.Join(directoryPath, eps1FileName), result.Value.Eps1Content);
+                File.WriteAllText(Path.Join(directoryPath, eps2FileName), result.Value.Eps2Content);
             }
+
+            ShowSuccess($"Files saved under {directoryPath}.");
+
+            #region Local methods
+
+            static bool DirectoryContains(string directoryPath, string fileName)
+            {
+                return File.Exists(Path.Join(directoryPath, fileName));
+            }
+
+            #endregion
         }
 
         private void AddFile(string filePath)
@@ -118,62 +181,6 @@ namespace LogToGrafity
             logFile.OnRemoved -= OnRemoveFile;
             LogFiles.Remove(logFile);
             RaisePropertyChanged(nameof(LogFiles));
-        }
-
-        private void ReadFile(string filePath)
-        {
-            if (!File.Exists(filePath))
-            {
-                ShowWarning($"File {filePath} no longer exists. It will be ignored.");
-                return;
-            }
-
-            Result<(string Eps1Content, string Eps2Content)> result = ParseFile(filePath);
-            if (result.IsFailure)
-            {
-                ShowError(result.Message);
-                return;
-            }
-
-            ShowSuccess("Select a folder where converted files will be saved.");
-
-            System.Windows.Forms.FolderBrowserDialog dialog = new()
-            {
-                RootFolder = Environment.SpecialFolder.Desktop,
-                ShowNewFolderButton = true
-            };
-            if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
-                return;
-
-            string fileName = Path.GetFileNameWithoutExtension(filePath);
-            string eps1FileName = $"{fileName}_eps1.csv";
-            string eps2FileName = $"{fileName}_eps2.csv";
-            string directoryPath = dialog.SelectedPath;
-
-            while (DirectoryContains(directoryPath, eps1FileName) || DirectoryContains(directoryPath, eps1FileName))
-            {
-                if (MessageBox.Show(
-                    $"Files already exist at that location. Do you want to overwrite them?",
-                    "Overwrite?",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Question) == MessageBoxResult.No)
-                {
-                    if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
-                        return;
-
-                    directoryPath = dialog.SelectedPath;
-                }
-                else break;
-            }
-
-            File.WriteAllText(Path.Join(directoryPath, eps1FileName), result.Value.Eps1Content);
-            File.WriteAllText(Path.Join(directoryPath, eps2FileName), result.Value.Eps2Content);
-            ShowSuccess($"Saved under {directoryPath}.");
-        }
-
-        private static bool DirectoryContains(string directoryPath, string fileName)
-        {
-            return File.Exists(Path.Join(directoryPath, fileName));
         }
 
         private static void ShowSuccess(string message)
