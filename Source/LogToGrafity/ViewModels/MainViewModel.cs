@@ -131,7 +131,7 @@ namespace LogToGrafity
                 return;
             }
 
-            ShowSuccess("Now select a folder in which files eps1.csv and eps2.csv will be saved.");
+            ShowSuccess("Select a folder where converted files will be saved.");
 
             System.Windows.Forms.FolderBrowserDialog dialog = new()
             {
@@ -141,14 +141,15 @@ namespace LogToGrafity
             if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
                 return;
 
-            string eps1FileName = "eps1.csv";
-            string eps2FileName = "eps2.csv";
+            string fileName = Path.GetFileNameWithoutExtension(filePath);
+            string eps1FileName = $"{fileName}_eps1.csv";
+            string eps2FileName = $"{fileName}_eps2.csv";
             string directoryPath = dialog.SelectedPath;
 
             while (DirectoryContains(directoryPath, eps1FileName) || DirectoryContains(directoryPath, eps1FileName))
             {
                 if (MessageBox.Show(
-                    $"{eps1FileName} or {eps2FileName} already exist. Do you want to overwrite them?",
+                    $"Files already exist at that location. Do you want to overwrite them?",
                     "Overwrite?",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Question) == MessageBoxResult.No)
@@ -163,7 +164,7 @@ namespace LogToGrafity
 
             File.WriteAllText(Path.Join(directoryPath, eps1FileName), result.Value.Eps1Content);
             File.WriteAllText(Path.Join(directoryPath, eps2FileName), result.Value.Eps2Content);
-            ShowSuccess("Saved!");
+            ShowSuccess($"Saved under {directoryPath}.");
         }
 
         private static bool DirectoryContains(string directoryPath, string fileName)
