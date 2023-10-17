@@ -79,12 +79,16 @@ namespace LogToGrafity
         {
             OpenFileDialog openFileDialog = new()
             {
-                Filter = "Log files (*.log)|*.log"
+                Filter = "Log files (*.log)|*.log",
+                Multiselect = true,
             };
             if (openFileDialog.ShowDialog() != true)
                 return;
 
-            AddFile(openFileDialog.FileName);
+            foreach (string fileName in openFileDialog.FileNames)
+            {
+                AddFile(fileName);
+            }
         }
 
         private void ConvertFiles()
