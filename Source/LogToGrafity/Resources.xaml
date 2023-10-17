@@ -11,7 +11,7 @@
           <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
         <TextBlock Grid.Column="0" Text="{Binding FilePath}" />
-            <Button Grid.Column="2" Content="🗑" Padding="5 0" Command="{Binding RemoveCommand}" />
+            <Button Grid.Column="2" Content="❌" Padding="5 0" Command="{Binding RemoveCommand}" />
         </Grid>
     </DataTemplate>
 
