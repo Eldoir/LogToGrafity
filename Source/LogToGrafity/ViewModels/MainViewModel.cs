@@ -41,7 +41,7 @@ namespace LogToGrafity
 
         public bool OnDragEnter(string[] filepaths)
         {
-            bool accepts = filepaths.All(IsCorrectFormat);
+            bool accepts = filepaths.Any(IsCorrectFormat);
             DragNDropState = accepts ? DragNDropState.Accept : DragNDropState.Reject;
             return accepts;
         }
@@ -55,7 +55,7 @@ namespace LogToGrafity
         {
             foreach (string filepath in filepaths)
             {
-                if (IsCorrectFormat(filepath))
+                if (SupportedFormats.Supports(filepath))
                 {
                     AddFile(filepath);
                 }
@@ -72,14 +72,14 @@ namespace LogToGrafity
 
         private static bool IsCorrectFormat(string filePath)
         {
-            return filePath.EndsWith(".log");
+            return SupportedFormats.Supports(filePath);
         }
 
         private void OpenFile()
         {
             OpenFileDialog openFileDialog = new()
             {
-                Filter = "Log files (*.log)|*.log",
+                Filter = SupportedFormats.ToFilter(),
                 Multiselect = true,
             };
             if (openFileDialog.ShowDialog() != true)
@@ -127,7 +127,7 @@ namespace LogToGrafity
                         return;
 
                     directoryPath = dialog.SelectedPath;
-                    
+
                     while (DirectoryContains(directoryPath, eps1FileName) || DirectoryContains(directoryPath, eps2FileName))
                     {
                         // TODO: fix this messagebox appearing only if the files from the FIRST source already exist
@@ -241,5 +241,8 @@ namespace LogToGrafity
 
         private readonly IRowParser _rowParser;
         private readonly IRowAnalyzer _rowAnalyzer;
+
+        private static readonly FileFormatContainer SupportedFormats = new(
+            new FileFormat[] { new("Log files", ".log"), new("Text files", ".txt") });
     }
 }
