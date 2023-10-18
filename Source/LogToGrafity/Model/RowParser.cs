@@ -14,16 +14,29 @@ namespace LogToGrafity
         public Result<Row> Parse(string row)
         {
             string[] values = row.Trim().Split('\t');
-            if (values.Length < 8)
-                return Result.Fail<Row>("Row needs at least 8 values since, eps1 and eps2 are the 7th and 8th values");
+
+            int eps1Idx, eps2Idx;
+
+            if (values.Length == 4)
+            {
+                eps1Idx = 2;
+                eps2Idx = 3;
+            }
+            else if (values.Length >= 8)
+            {
+                eps1Idx = 6;
+                eps2Idx = 7;
+            }
+            else
+                return Result.Fail<Row>("Row is expecting either 4 values, or at least 8 values");
 
             string tempStr = values[1];
             if (!double.TryParse(tempStr, CultureInfo.InvariantCulture, out double temp))
                 return Result.Fail<Row>($"Unknown temperature: {tempStr}");
 
             string freq = values[0];
-            string eps1 = values[6];
-            string eps2 = values[7];
+            string eps1 = values[eps1Idx];
+            string eps2 = values[eps2Idx];
             return Result.Ok(new Row(freq, temp, eps1, eps2));
         }
     }
