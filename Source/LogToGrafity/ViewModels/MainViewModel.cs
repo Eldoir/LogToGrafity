@@ -94,6 +94,7 @@ namespace LogToGrafity
         private void ConvertFiles()
         {
             string directoryPath = string.Empty;
+            bool allSuccess = true;
 
             foreach (LogFileViewModel logFile in LogFiles)
             {
@@ -106,6 +107,7 @@ namespace LogToGrafity
                 Result<(string Eps1Content, string Eps2Content)> result = ParseFile(logFile.FilePath);
                 if (result.IsFailure)
                 {
+                    allSuccess = false;
                     ShowError(result.Message);
                     continue;
                 }
@@ -150,7 +152,10 @@ namespace LogToGrafity
                 File.WriteAllText(Path.Join(directoryPath, eps2FileName), result.Value.Eps2Content);
             }
 
-            ShowSuccess($"Files saved under {directoryPath}.");
+            if (allSuccess)
+            {
+                ShowSuccess($"Files saved under {directoryPath}.");
+            }
 
             #region Local methods
 
