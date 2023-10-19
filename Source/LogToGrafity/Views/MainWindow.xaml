@@ -23,7 +23,8 @@
                 <local:CollectionSizeConverter x:Key="EmptyToVisible" IfEmpty="Visible" IfNotEmpty="Collapsed" />
                 <local:CollectionSizeConverter x:Key="EmptyToCollapsed" IfEmpty="Collapsed" IfNotEmpty="Visible" />
                 <local:CollectionSizeConverter x:Key="EmptyToFalse" IfEmpty="False" IfNotEmpty="True" />
-            </ResourceDictionary>
+            <local:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        </ResourceDictionary>
         </Window.Resources>
     <Grid Margin="5">
         <Grid.ColumnDefinitions>
@@ -78,6 +79,8 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="5" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="5" />
                     <RowDefinition Height="50" />
                 </Grid.RowDefinitions>
                 <ScrollViewer Grid.Row="0"
@@ -94,7 +97,27 @@
                             ItemTemplate="{StaticResource LogFileTemplate}" />
                     </Grid>
                 </ScrollViewer>
-                <Button Grid.Row="2"
+                <Grid Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Columns are: " />
+                    <RadioButton Grid.Column="2"
+                                 Content="Temperature"
+                                 VerticalAlignment="Center"
+                                 GroupName="ColumnnMode"
+                                 IsChecked="{Binding AreColumnsTemperature, Mode=TwoWay}" />
+                    <RadioButton Grid.Column="4"
+                                 Content="Frequency"
+                                 VerticalAlignment="Center"
+                                 GroupName="ColumnnMode"
+                                 IsChecked="{Binding AreColumnsTemperature, Mode=TwoWay, Converter={StaticResource InverseBooleanConverter}}"/>
+                </Grid>
+                <Button Grid.Row="4"
                         Command="{Binding ConvertCommand}"
                         IsEnabled="{Binding LogFiles, Converter={StaticResource EmptyToFalse}}"
                         Content="Convert ↦"

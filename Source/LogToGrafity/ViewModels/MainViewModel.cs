@@ -34,6 +34,8 @@ namespace LogToGrafity
         }
         private DragNDropState _dragNDropState;
 
+        public bool AreColumnsTemperature { get; set; } = true;
+
         public ObservableCollection<LogFileViewModel> LogFiles => _logFiles;
         private readonly ObservableCollection<LogFileViewModel> _logFiles = new();
 
@@ -228,18 +230,26 @@ namespace LogToGrafity
             return Result.Ok((ToString(Eps1), ToString(Eps2)));
         }
 
-        private static string ToString(EpsContainer eps)
+        private string ToString(EpsContainer eps)
         {
             StringBuilder builder = new();
 
-            // Write column names
-            builder.AppendLine(string.Join(" ", new[] { "Freq" }.Concat(eps.ColumnNames)));
-
-            // Write rows
-            foreach (string freq in eps.Frequencies)
+            if (AreColumnsTemperature)
             {
-                builder.AppendLine(string.Join(" ", new[] { freq }.Concat(eps.GetValues(freq))));
+                builder.AppendLine(string.Join(" ", new[] { "Freq" }.Concat(eps.Temperatures)));
+                foreach (string freq in eps.Frequencies)
+                {
+                    builder.AppendLine(string.Join(" ", new[] { freq }.Concat(eps.GetValues(freq))));
+                }
             }
+            else
+            {
+                builder.AppendLine(string.Join(" ", new[] { "Temp" }.Concat(eps.Frequencies)));
+                foreach (string temp in eps.Temperatures)
+                {
+                    builder.AppendLine(string.Join(" ", new[] { temp }.Concat(eps.GetValuesAlternative(temp))));
+                }
+            }            
 
             return builder.ToString();
         }

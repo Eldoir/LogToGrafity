@@ -22,10 +22,20 @@ namespace LogToGrafity
             return _dic[frequency].Select(pair => pair.Value);
         }
 
+        public IEnumerable<string> GetValuesAlternative(string temp)
+        {
+            List<string> values = new();
+            foreach (var freq in _dic.Keys)
+            {
+                values.Add(_dic[freq].Single(pair => pair.ColumnName == temp).Value);
+            }
+            return values;
+        }
+
         /// <summary>
-        /// NOTE: column names should be the same for every frequency, and be distinct.
+        /// NOTE: temperatures should be the same for every frequency, and be distinct.
         /// </summary>
-        public IEnumerable<string> ColumnNames => _dic.First().Value.Select(pair => pair.ColumnName);
+        public IEnumerable<string> Temperatures => _dic.First().Value.Select(pair => pair.ColumnName);
 
         public IEnumerable<string> Frequencies => _dic.Keys;
 
