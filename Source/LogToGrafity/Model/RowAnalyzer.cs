@@ -5,14 +5,19 @@ namespace LogToGrafity
     public interface IRowAnalyzer
     {
         /// <summary>
-        /// Returns a <see cref="EpsContainer"/> for eps1, and one for eps2.
+        /// Returns the string representation of <see cref="EpsContainer"/> for eps1, and one for eps2.
         /// </summary>
-        (EpsContainer, EpsContainer) Analyze(IEnumerable<Row> rows);
+        (string Eps1Content, string Eps2Content) Analyze(IEnumerable<Row> rows);
     }
 
     public class RowAnalyzer : IRowAnalyzer
     {
-        public (EpsContainer, EpsContainer) Analyze(IEnumerable<Row> rows)
+        public RowAnalyzer(IEpsContainerStringConverter converter)
+        {
+            _converter = converter;
+        }
+
+        public (string Eps1Content, string Eps2Content) Analyze(IEnumerable<Row> rows)
         {
             IncreaseDecreaseTracker tracker = new();
             EpsContainer eps1 = new();
@@ -26,7 +31,9 @@ namespace LogToGrafity
                 eps2.AddEntry(row.Freq, (columnName, row.Eps2));
             }
 
-            return (eps1, eps2);
+            return (_converter.ToString(eps1), _converter.ToString(eps2));
         }
+
+        private readonly IEpsContainerStringConverter _converter;
     }
 }

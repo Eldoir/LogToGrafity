@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using System.Windows.Input;
 
@@ -21,7 +20,6 @@ namespace LogToGrafity
             ConvertCommand = new DelegateCommand(ConvertFiles);
 
             _rowParser = new RowParser();
-            _rowAnalyzer = new RowAnalyzer();
         }
 
         public ICommand OpenFileCommand { get; }
@@ -225,53 +223,11 @@ namespace LogToGrafity
                 rows.Add(rowResult.Value);
             }
 
-            (EpsContainer Eps1, EpsContainer Eps2) = _rowAnalyzer.Analyze(rows);
-
-            return Result.Ok((ToString(Eps1), ToString(Eps2)));
-        }
-
-        private string ToString(EpsContainer eps)
-        {
-            StringBuilder builder = new();
-
-            if (AreColumnsTemperature)
-            {
-                builder.AppendLine(string.Join(" ", new[] { "Freq" }.Concat(eps.Temperatures)));
-                foreach (string freq in eps.Frequencies)
-                {
-                    builder.AppendLine(string.Join(" ", new[] { freq }.Concat(eps.GetValues(freq))));
-                }
-            }
-            else
-            {
-                builder.AppendLine(string.Join(" ", new[] { "Temp" }.Concat(eps.Frequencies.Select(freq => $"\"{freq}\""))));
-                foreach (string temp in eps.Temperatures)
-                {
-                    builder.AppendLine(string.Join(" ", new[] { ParseIntTemp(temp) }.Concat(eps.GetValuesAlternative(temp))));
-                }
-            }            
-
-            return builder.ToString();
-
-            #region Local methods
-
-            string ParseIntTemp(string temp)
-            {
-                int cIndex = temp.IndexOf('C');
-                if (cIndex != -1)
-                    return temp[..cIndex];
-                int hIndex = temp.IndexOf('H');
-                if (hIndex != -1)
-                    return temp[..hIndex];
-
-                throw new InvalidOperationException();
-            }
-
-            #endregion
+            RowAnalyzer rowAnalyzer = new(EpsContainerStringConverterFactory.Create(AreColumnsTemperature));
+            return Result.Ok(rowAnalyzer.Analyze(rows));
         }
 
         private readonly IRowParser _rowParser;
-        private readonly IRowAnalyzer _rowAnalyzer;
 
         private static readonly FileFormatContainer SupportedFormats = new(
             new FileFormat[] { new("Log files", ".log"), new("Text files", ".txt") });

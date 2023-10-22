@@ -17,15 +17,15 @@ namespace LogToGrafity
             _dic[freq].Add(pair);
         }
 
-        public IEnumerable<string> GetValues(string frequency)
+        public IEnumerable<string> GetValuesByFrequency(string frequency)
         {
             return _dic[frequency].Select(pair => pair.Value);
         }
 
-        public IEnumerable<string> GetValuesAlternative(string temp)
+        public IEnumerable<string> GetValuesByTemperature(string temp)
         {
             List<string> values = new();
-            foreach (var freq in _dic.Keys)
+            foreach (string freq in _dic.Keys)
             {
                 values.Add(_dic[freq].Single(pair => pair.ColumnName == temp).Value);
             }
