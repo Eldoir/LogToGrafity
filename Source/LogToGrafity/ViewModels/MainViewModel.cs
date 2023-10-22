@@ -244,14 +244,30 @@ namespace LogToGrafity
             }
             else
             {
-                builder.AppendLine(string.Join(" ", new[] { "Temp" }.Concat(eps.Frequencies)));
+                builder.AppendLine(string.Join(" ", new[] { "Temp" }.Concat(eps.Frequencies.Select(freq => $"\"{freq}\""))));
                 foreach (string temp in eps.Temperatures)
                 {
-                    builder.AppendLine(string.Join(" ", new[] { temp }.Concat(eps.GetValuesAlternative(temp))));
+                    builder.AppendLine(string.Join(" ", new[] { ParseIntTemp(temp) }.Concat(eps.GetValuesAlternative(temp))));
                 }
             }            
 
             return builder.ToString();
+
+            #region Local methods
+
+            string ParseIntTemp(string temp)
+            {
+                int cIndex = temp.IndexOf('C');
+                if (cIndex != -1)
+                    return temp[..cIndex];
+                int hIndex = temp.IndexOf('H');
+                if (hIndex != -1)
+                    return temp[..hIndex];
+
+                throw new InvalidOperationException();
+            }
+
+            #endregion
         }
 
         private readonly IRowParser _rowParser;
