@@ -128,6 +128,6 @@
                         Padding="5" />
             </Grid>
         </Grid>
-        <local:LogViewer Grid.Column="6" Logs="{Binding Logs}" />
+        <local:LogViewer Grid.Column="6" DataContext="{Binding LogViewer}" />
     </Grid>
 </Window>

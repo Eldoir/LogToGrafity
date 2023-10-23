@@ -20,9 +20,10 @@ namespace LogToGrafity
             ConvertCommand = new DelegateCommand(ConvertFiles);
 
             _rowParser = new RowParser();
-            Logs.Add(new LogElement(LogLevel.Info, "Info"));
-            Logs.Add(new LogElement(LogLevel.Warning, "Warning"));
-            Logs.Add(new LogElement(LogLevel.Error, "Error"));
+
+            LogViewer.LogInfo("Info");
+            LogViewer.LogWarning("Warning");
+            LogViewer.LogError("Coucou");
         }
 
         public ICommand OpenFileCommand { get; }
@@ -36,7 +37,7 @@ namespace LogToGrafity
         private DragNDropState _dragNDropState;
 
         public bool AreColumnsTemperature { get; set; } = true;
-        public ObservableCollection<LogElement> Logs { get; } = new();
+        public LogViewer LogViewer{ get; } = new();
 
         public ObservableCollection<LogFileViewModel> LogFiles => _logFiles;
         private readonly ObservableCollection<LogFileViewModel> _logFiles = new();

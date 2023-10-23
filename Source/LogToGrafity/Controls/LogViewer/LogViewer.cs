@@ -17,5 +17,20 @@ namespace LogToGrafity
             get => (ObservableCollection<LogElement>)GetValue(LogsProperty);
             set => SetValue(LogsProperty, value);
         }
+
+        public void LogInfo(string message)
+        {
+            Logs.Add(new LogElement(LogLevel.Info, message));
+        }
+
+        public void LogWarning(string message)
+        {
+            Logs.Add(new LogElement(LogLevel.Warning, message));
+        }
+
+        public void LogError(string message)
+        {
+            Logs.Add(new LogElement(LogLevel.Error, message));
+        }
     }
 }
