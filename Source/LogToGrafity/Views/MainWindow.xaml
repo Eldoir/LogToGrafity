@@ -14,8 +14,9 @@
         <Window.Resources>
             <ResourceDictionary>
                 <ResourceDictionary.MergedDictionaries>
-                    <ResourceDictionary Source="/Resources.xaml" />
-                </ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/Resources.xaml" />
+                <ResourceDictionary Source="/Controls/LogViewer/LogViewer.Resources.xaml" />
+            </ResourceDictionary.MergedDictionaries>
                 <local:MultiConverter x:Key="DragNDropStateToBrushConverter">
                     <local:DragNDropStateToColorConverter />
                     <local:ColorToBrushConverter />
@@ -31,6 +32,8 @@
             <ColumnDefinition Width="200" />
             <ColumnDefinition Width="5" />
             <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="5" />
+            <ColumnDefinition Width="*" />
             <ColumnDefinition Width="5" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
@@ -125,5 +128,6 @@
                         Padding="5" />
             </Grid>
         </Grid>
+        <local:LogViewer Grid.Column="6" Logs="{Binding Logs}" />
     </Grid>
 </Window>
