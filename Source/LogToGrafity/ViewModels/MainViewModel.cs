@@ -20,10 +20,6 @@ namespace LogToGrafity
             ConvertCommand = new DelegateCommand(ConvertFiles);
 
             _rowParser = new RowParser();
-
-            LogViewer.LogInfo("Info");
-            LogViewer.LogWarning("Warning");
-            LogViewer.LogError("Coucou");
         }
 
         public ICommand OpenFileCommand { get; }
@@ -58,6 +54,8 @@ namespace LogToGrafity
 
         public void OnDrop(string[] filepaths)
         {
+            bool atLeastOneWarning = false;
+
             foreach (string filepath in filepaths)
             {
                 if (SupportedFormats.Supports(filepath))
@@ -66,8 +64,14 @@ namespace LogToGrafity
                 }
                 else
                 {
-                    ShowWarning($"File {filepath} is not a log file. It will be ignored.");
+                    atLeastOneWarning = true;
+                    LogViewer.LogWarning($"File {filepath} is not a log file. It will be ignored.");
                 }
+            }
+
+            if (atLeastOneWarning)
+            {
+                ShowWarning($"At least one file was ignored. Check the logs for more info.");
             }
 
             OnDragLeave(filepaths);
@@ -100,12 +104,14 @@ namespace LogToGrafity
         {
             string directoryPath = string.Empty;
             bool allSuccess = true;
+            bool atLeastOneWarning = false;
 
             foreach (LogFileViewModel logFile in LogFiles)
             {
                 if (!File.Exists(logFile.FilePath))
                 {
-                    ShowWarning($"File {logFile.FilePath} no longer exists. It will be ignored.");
+                    atLeastOneWarning = true;
+                    LogViewer.LogWarning($"File {logFile.FilePath} no longer exists. It will be ignored.");
                     continue;
                 }
 
@@ -113,7 +119,7 @@ namespace LogToGrafity
                 if (result.IsFailure)
                 {
                     allSuccess = false;
-                    ShowError(result.Message);
+                    LogViewer.LogError($"Error with file {logFile.FilePath}: {result.Message}");
                     continue;
                 }
 
@@ -157,9 +163,20 @@ namespace LogToGrafity
                 File.WriteAllText(Path.Join(directoryPath, eps2FileName), result.Value.Eps2Content);
             }
 
+            if (atLeastOneWarning)
+            {
+                ShowWarning($"At least one file was ignored. Check the logs for more info.");
+            }
+
             if (allSuccess)
             {
-                ShowSuccess($"Files saved under {directoryPath}.");
+                string message = $"Files saved under {directoryPath}.";
+                LogViewer.LogInfo(message);
+                ShowSuccess(message);
+            }
+            else
+            {
+                ShowError("At least one error occurred. Check the logs for more info.");
             }
 
             #region Local methods
