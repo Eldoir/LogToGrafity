@@ -33,7 +33,7 @@ namespace LogToGrafity
         private DragNDropState _dragNDropState;
 
         public bool AreColumnsTemperature { get; set; } = true;
-        public LogViewer LogViewer{ get; } = new();
+        public LogViewer LogViewer { get; } = new();
 
         public ObservableCollection<LogFileViewModel> LogFiles => _logFiles;
         private readonly ObservableCollection<LogFileViewModel> _logFiles = new();

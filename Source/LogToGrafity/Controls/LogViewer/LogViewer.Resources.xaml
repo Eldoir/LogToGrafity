@@ -122,13 +122,16 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <ToggleButton Grid.Column="0" Margin="0 0 2 0" Style="{StaticResource LogViewerToggleButtonStyle}" IsChecked="True">
+                <ToggleButton Grid.Column="0" Margin="0 0 2 0" Style="{StaticResource LogViewerToggleButtonStyle}" IsChecked="True"
+                              Command="{Binding ToggleFilterCommand}" CommandParameter="{x:Static local:LogLevel.Info}">
                     <Image Source="{StaticResource Icon_Info}" />
                 </ToggleButton>
-                <ToggleButton Grid.Column="1" Margin="0 0 2 0" Style="{StaticResource LogViewerToggleButtonStyle}" IsChecked="True">
+                <ToggleButton Grid.Column="1" Margin="0 0 2 0" Style="{StaticResource LogViewerToggleButtonStyle}" IsChecked="True"
+                              Command="{Binding ToggleFilterCommand}" CommandParameter="{x:Static local:LogLevel.Warning}">
                     <Image Source="{StaticResource Icon_Warning}" />
                 </ToggleButton>
-                <ToggleButton Grid.Column="2" Margin="0 0 2 0" Style="{StaticResource LogViewerToggleButtonStyle}" IsChecked="True">
+                <ToggleButton Grid.Column="2" Margin="0 0 2 0" Style="{StaticResource LogViewerToggleButtonStyle}" IsChecked="True"
+                              Command="{Binding ToggleFilterCommand}" CommandParameter="{x:Static local:LogLevel.Error}">
                     <Image Source="{StaticResource Icon_Error}" />
                 </ToggleButton>
             </Grid>
@@ -138,8 +141,8 @@
                 <Grid>
                     <Rectangle Fill="AliceBlue" Stroke="Black" />
                     <ItemsControl DataContext="{Binding}"
-                      ItemsSource="{Binding Logs}"
-                      ItemTemplate="{StaticResource LogTemplate}" />
+                                  ItemsSource="{Binding FilteredLogs}"
+                                  ItemTemplate="{StaticResource LogTemplate}" />
                 </Grid>
             </ScrollViewer>
         </Grid>
