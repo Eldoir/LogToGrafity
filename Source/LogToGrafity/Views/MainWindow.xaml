@@ -8,126 +8,130 @@
         mc:Ignorable="d"
         Title="LogToGrafity" Height="250" MinHeight="150" Width="600" MinWidth="400"
         WindowStartupLocation="CenterScreen">
-        <Window.DataContext>
-            <local:MainViewModel />
-        </Window.DataContext>
-        <Window.Resources>
-            <ResourceDictionary>
-                <ResourceDictionary.MergedDictionaries>
+    <Window.DataContext>
+        <local:MainViewModel />
+    </Window.DataContext>
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/Resources.xaml" />
                 <ResourceDictionary Source="/Controls/LogViewer/LogViewer.Resources.xaml" />
             </ResourceDictionary.MergedDictionaries>
-                <local:MultiConverter x:Key="DragNDropStateToBrushConverter">
-                    <local:DragNDropStateToColorConverter />
-                    <local:ColorToBrushConverter />
-                </local:MultiConverter>
-                <local:CollectionSizeConverter x:Key="EmptyToVisible" IfEmpty="Visible" IfNotEmpty="Collapsed" />
-                <local:CollectionSizeConverter x:Key="EmptyToCollapsed" IfEmpty="Collapsed" IfNotEmpty="Visible" />
-                <local:CollectionSizeConverter x:Key="EmptyToFalse" IfEmpty="False" IfNotEmpty="True" />
+            <local:MultiConverter x:Key="DragNDropStateToBrushConverter">
+                <local:DragNDropStateToColorConverter />
+                <local:ColorToBrushConverter />
+            </local:MultiConverter>
+            <local:CollectionSizeConverter x:Key="EmptyToVisible" IfEmpty="Visible" IfNotEmpty="Collapsed" />
+            <local:CollectionSizeConverter x:Key="EmptyToCollapsed" IfEmpty="Collapsed" IfNotEmpty="Visible" />
+            <local:CollectionSizeConverter x:Key="EmptyToFalse" IfEmpty="False" IfNotEmpty="True" />
             <local:InverseBooleanConverter x:Key="InverseBooleanConverter" />
         </ResourceDictionary>
-        </Window.Resources>
-    <Grid Margin="5">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200" />
-            <ColumnDefinition Width="5" />
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="5" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="5" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-        <Grid Grid.Column="0">
-            <Rectangle
-                AllowDrop="True"
-                local:FileDragDropHelper.IsFileDragDropEnabled="True"
-                local:FileDragDropHelper.FileDragDropTarget="{Binding}"
-                Stroke="Black"
-                StrokeDashArray="20 10"
-                Cursor="Hand">
-                <b:Interaction.Triggers>
-                    <b:EventTrigger EventName="MouseLeftButtonDown">
-                        <b:InvokeCommandAction Command="{Binding OpenFileCommand}" />
-                    </b:EventTrigger>
-                </b:Interaction.Triggers>
-                <Rectangle.Style>
+    </Window.Resources>
+    <TabControl>
+        <TabItem Header="General">
+            <Grid Margin="5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200" />
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid Grid.Column="0">
+                    <Rectangle
+                        AllowDrop="True"
+                        local:FileDragDropHelper.IsFileDragDropEnabled="True"
+                        local:FileDragDropHelper.FileDragDropTarget="{Binding}"
+                        Stroke="Black"
+                        StrokeDashArray="20 10"
+                        Cursor="Hand">
+                        <b:Interaction.Triggers>
+                            <b:EventTrigger EventName="MouseLeftButtonDown">
+                                <b:InvokeCommandAction Command="{Binding OpenFileCommand}" />
+                            </b:EventTrigger>
+                        </b:Interaction.Triggers>
+                        <Rectangle.Style>
 
-                    <Style TargetType="{x:Type Rectangle}">
-                        <Setter Property="Fill"
-                            Value="{Binding DragNDropState, Converter={StaticResource DragNDropStateToBrushConverter}, Mode=OneWay}" />
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Fill" Value="AliceBlue" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Rectangle.Style>
-            </Rectangle>
-            <TextBlock
-                VerticalAlignment="Center"
-                HorizontalAlignment="Center"
-                IsHitTestVisible="False">
-                <Run Text="Click" FontWeight="Bold" />
-                <Run Text=" or " />
-                <Run Text="Drag" FontWeight="Bold" />
-                <Run Text=" files here" />
-            </TextBlock>
-        </Grid>
-        <Rectangle Grid.Column="2"
-                   Width="1"
-                   Fill="Black"
-                   Margin="10 0" />
-        <Grid Grid.Column="4">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="5" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
-                    <RowDefinition Height="50" />
-                </Grid.RowDefinitions>
-                <ScrollViewer Grid.Row="0"
-                              VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Auto">
-                    <Grid>
-                        <Rectangle Fill="AliceBlue" Stroke="Black" />
-                        <TextBlock Text="No file." Foreground="DimGray" Margin="5"
-                                   Visibility="{Binding LogFiles, Converter={StaticResource EmptyToVisible}}" />
-                        <ItemsControl
-                            DataContext="{Binding}"
-                            Visibility="{Binding LogFiles, Converter={StaticResource EmptyToCollapsed}}"
-                            ItemsSource="{Binding LogFiles}"
-                            ItemTemplate="{StaticResource LogFileTemplate}" />
-                    </Grid>
-                </ScrollViewer>
-                <Grid Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="10"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Text="Columns are: " />
-                    <RadioButton Grid.Column="2"
-                                 Content="Temperature"
-                                 VerticalAlignment="Center"
-                                 GroupName="ColumnnMode"
-                                 IsChecked="{Binding AreColumnsTemperature, Mode=TwoWay}" />
-                    <RadioButton Grid.Column="4"
-                                 Content="Frequency"
-                                 VerticalAlignment="Center"
-                                 GroupName="ColumnnMode"
-                                 IsChecked="{Binding AreColumnsTemperature, Mode=TwoWay, Converter={StaticResource InverseBooleanConverter}}"/>
+                            <Style TargetType="{x:Type Rectangle}">
+                                <Setter Property="Fill"
+                        Value="{Binding DragNDropState, Converter={StaticResource DragNDropStateToBrushConverter}, Mode=OneWay}" />
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Fill" Value="AliceBlue" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Rectangle.Style>
+                    </Rectangle>
+                    <TextBlock
+            VerticalAlignment="Center"
+            HorizontalAlignment="Center"
+            IsHitTestVisible="False">
+            <Run Text="Click" FontWeight="Bold" />
+            <Run Text=" or " />
+            <Run Text="Drag" FontWeight="Bold" />
+            <Run Text=" files here" />
+                    </TextBlock>
                 </Grid>
-                <Button Grid.Row="4"
-                        Command="{Binding ConvertCommand}"
-                        IsEnabled="{Binding LogFiles, Converter={StaticResource EmptyToFalse}}"
-                        Content="Convert ↦"
-                        FontSize="18"
-                        Padding="5" />
+                <Rectangle Grid.Column="2"
+               Width="1"
+               Fill="Black"
+               Margin="10 0" />
+                <Grid Grid.Column="4">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="5" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="5" />
+                            <RowDefinition Height="50" />
+                        </Grid.RowDefinitions>
+                        <ScrollViewer Grid.Row="0"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Auto">
+                            <Grid>
+                                <Rectangle Fill="AliceBlue" Stroke="Black" />
+                                <TextBlock Text="No file." Foreground="DimGray" Margin="5"
+                               Visibility="{Binding LogFiles, Converter={StaticResource EmptyToVisible}}" />
+                                <ItemsControl
+                        DataContext="{Binding}"
+                        Visibility="{Binding LogFiles, Converter={StaticResource EmptyToCollapsed}}"
+                        ItemsSource="{Binding LogFiles}"
+                        ItemTemplate="{StaticResource LogFileTemplate}" />
+                            </Grid>
+                        </ScrollViewer>
+                        <Grid Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Columns are: " />
+                            <RadioButton Grid.Column="2"
+                             Content="Temperature"
+                             VerticalAlignment="Center"
+                             GroupName="ColumnnMode"
+                             IsChecked="{Binding AreColumnsTemperature, Mode=TwoWay}" />
+                            <RadioButton Grid.Column="4"
+                             Content="Frequency"
+                             VerticalAlignment="Center"
+                             GroupName="ColumnnMode"
+                             IsChecked="{Binding AreColumnsTemperature, Mode=TwoWay, Converter={StaticResource InverseBooleanConverter}}"/>
+                        </Grid>
+                        <Button Grid.Row="4"
+                    Command="{Binding ConvertCommand}"
+                    IsEnabled="{Binding LogFiles, Converter={StaticResource EmptyToFalse}}"
+                    Content="Convert ↦"
+                    FontSize="18"
+                    Padding="5" />
+                    </Grid>
+                </Grid>
             </Grid>
-        </Grid>
-        <local:LogViewer Grid.Column="6" DataContext="{Binding LogViewer}" />
-    </Grid>
+        </TabItem>
+        <TabItem Header="Logs">
+            <local:LogViewer Grid.Column="6" DataContext="{Binding LogViewer}" />
+        </TabItem>
+    </TabControl>
 </Window>
